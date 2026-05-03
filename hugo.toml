@@ -24,6 +24,11 @@ theme = 'hello-friend-ng'
         name = "linkedin"
         url = "https://www.linkedin.com/in/matthew-penney-9979851a4"
 
+    [[params.social]]
+
+        name = "email"
+        url = "mailto:matt@matthewpenney.net"
+
 [menu]
 
     [[menu.main]]
