@@ -26,6 +26,7 @@ jobs:
 
       - name: Debug build output
         run: ls -R public
+        run: ls -R themes
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
