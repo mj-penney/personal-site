@@ -26,6 +26,8 @@ jobs:
 
       - name: Debug build output
         run: ls -R public
+
+      - name: Debug themes
         run: ls -R themes
 
       - name: Deploy
