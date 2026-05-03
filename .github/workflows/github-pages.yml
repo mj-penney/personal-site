@@ -24,8 +24,12 @@ jobs:
       - name: Build
         run: hugo --minify
 
+      - name: Debug build output
+        run: ls -R public
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+          force_orphan: true
