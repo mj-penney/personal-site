@@ -27,7 +27,7 @@ jobs:
         run: hugo --minify
 
       - name: Add CNAME
-        run: echo "www.matthewpenney.net" > ./public/CNAME
+        run: echo "matthewpenney.net" > ./public/CNAME
 
       - name: Debug build output
         run: ls -R public
