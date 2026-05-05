@@ -12,7 +12,7 @@ theme = 'hello-friend-ng'
 [params]
 
     enableThemeToggle = true
-    homeSubtitle = "Systems Programmer & QEMU contributor from London, UK"
+    homeSubtitle = "Systems Programmer based in London, UK"
 
     [[params.social]]
 
