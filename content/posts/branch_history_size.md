@@ -40,7 +40,7 @@ I use the `BRANCH` workload for this investigation.
 I vary the `pattern-len` workload param while keeping the `n-branches` param
 constant.
 This results in the workload processing an array of length `n-branches`,
-containing a repeating binary pattern of length `pattern-length` (e.g.
+containing a repeating binary pattern of length `pattern-len` (e.g.
 "10110100...").
 For each element in the array, if the value is a 1 the branch will be taken,
 and not taken if the value is 0.
