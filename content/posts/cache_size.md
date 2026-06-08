@@ -1,7 +1,7 @@
 ---
-title: "Reverse Engineering my CPU's Cache Sizes"
+title: "Intel Kaby Lake Cache Latency"
 date: 2026-05-09T17:50:18+01:00
-draft: false
+draft: true
 toc: false
 images:
 tags:
