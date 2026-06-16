@@ -1,7 +1,7 @@
 ---
 title: "Intel Kaby Lake: Cache Latencies"
-date: 2026-05-09T17:50:18+01:00
-draft: true
+date: 2026-06-16T17:50:18+01:00
+draft: false
 toc: false
 images:
 tags:
