@@ -1,5 +1,5 @@
 ---
-title: "Investigating Kaby Lake's Branch Predictor"
+title: "Intel Kaby Lake: Branch Prediction"
 date: 2026-06-06T17:50:18+01:00
 draft: false
 toc: false
