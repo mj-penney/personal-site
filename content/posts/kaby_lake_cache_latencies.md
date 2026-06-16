@@ -11,8 +11,8 @@ tags:
 
 ## Introduction
 
-In this post I use my [Cyclops tool](https://github.com/mj-penney/cyclops) to
-estimate the latencies of my Kaby Lake CPU's L1D, L2 and L3 caches.
+In this post I use [Cyclops](https://github.com/mj-penney/cyclops) to estimate
+the latencies of my Kaby Lake CPU's L1D, L2 and L3 caches.
 
 ## Methods
 
