@@ -47,7 +47,7 @@ predictor is able to represent the history of branch prediction results.
 Initially I wanted to do a coarse-grained sweep of pattern lengths to see at
 which length the predictor starts to struggle, and how its accuracy degrades.
 
-![Branch Misprediction Curves](/img/branch_fig_1.png)
+<img src="/img/branch_fig_1.png" alt="Branch Misprediction Curves" class="center" />
 
 The branch predictor achieves effectively no mispredictions for short
 patterns (<1k).
@@ -81,7 +81,7 @@ Having seen how the predictor behaves over a wide range of pattern lengths, I
 repeated the experiment for more focused ranges.
 The figure below shows the point at which the predictor starts making mistakes.
 
-![Branch Misprediction Curves](/img/branch_first_mispredictions.png)
+<img src="/img/branch_first_mispredictions.png" alt="Branch Misprediction Curves" class="center" />
 
 The predictor achieves effectively perfect prediction for random, unbiased
 patterns of length up to ~900.
@@ -90,7 +90,7 @@ Beyond that, the exponential increase in mispredictions begins.
 The next figure shows the misprediction rate and IPC for pattern lengths 2-5k,
 where the majority of the increase in misprediction rate occurs.
 
-![Branch Misprediction Curves](/img/branch_fig_2.png)
+<img src="/img/branch_fig_2.png" alt="Branch Misprediction Curves" class="center" />
 
 The thing that jumped out at me here was that IPC did not decrease
 significantly until the misprediction rate was already at ~10% (pattern length 

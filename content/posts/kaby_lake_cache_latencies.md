@@ -51,7 +51,7 @@ cache-boundaries in the figure below (mainly the L2/L3 boundary).
 
 ## Results
 
-![Latency per Access](/img/latency_plot.png)
+<img src="/img/latency_plot.png" alt="Latency per Access" class="center" />
 
 My results clearly show the jump in latency from the L1D cache to L2, with both
 producing singular flat values of 6 and 13 cycles respectively.
