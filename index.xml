@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Matthew Penney</title><link>https://matthewpenney.net/</link><description>Recent content on Matthew Penney</description><generator>Hugo</generator><language>en-gb</language><lastBuildDate>Tue, 16 Jun 2026 17:50:18 +0100</lastBuildDate><atom:link href="https://matthewpenney.net/index.xml" rel="self" type="application/rss+xml"/><item><title>Intel Kaby Lake: Cache Latencies</title><link>https://matthewpenney.net/posts/kaby_lake_cache_latencies/</link><pubDate>Tue, 16 Jun 2026 17:50:18 +0100</pubDate><guid>https://matthewpenney.net/posts/kaby_lake_cache_latencies/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In this post I use &lt;a href="https://github.com/mj-penney/cyclops"&gt;Cyclops&lt;/a&gt; to estimate
+the latencies of my Kaby Lake CPU&amp;rsquo;s L1D, L2 and L3 caches.&lt;/p&gt;
+&lt;h2 id="methods"&gt;Methods&lt;/h2&gt;
+&lt;p&gt;For this experiment I used the &lt;code&gt;STRIDED_ARRAY&lt;/code&gt; workload, in which an array with
+one element per 64-Byte cache line is processed.
+Having one element per cache line ensures that each load doesn&amp;rsquo;t bring other
+elements with it into cache.&lt;/p&gt;
+&lt;p&gt;Previous versions of the workload processed the array sequentially enabling the
+prefetcher to load future elements into cache ahead of time, hiding the true
+latency.
+To prevent prefetching, elements are now processed in a random order, where the
+index of the next element depends on the value of the current element.&lt;/p&gt;</description></item><item><title>Intel Kaby Lake: Branch Prediction</title><link>https://matthewpenney.net/posts/kaby_lake_branch_prediction/</link><pubDate>Sat, 06 Jun 2026 17:50:18 +0100</pubDate><guid>https://matthewpenney.net/posts/kaby_lake_branch_prediction/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;This is the first in what I hope will be a multi-part investigation into
+branch predictors, starting with my laptop&amp;rsquo;s Intel Kaby Lake CPU.
+Initially I just want to get a general overview the predictor&amp;rsquo;s behaviour
+rather than answer specific questions about its structure (e.g. &amp;ldquo;How many
+predictor tables are there?&amp;rdquo;).&lt;/p&gt;
+&lt;p&gt;Intel&amp;rsquo;s Kaby Lake microarchitecture uses the same branch predictor as Skylake.
+Like many modern branch predictors it has a hybrid structure that likely
+incorporates multiple predictor tables and a global history in a TAGE-like
+design.&lt;/p&gt;</description></item><item><title>Cyclops</title><link>https://matthewpenney.net/projects/cyclops/</link><pubDate>Sun, 03 May 2026 17:50:37 +0100</pubDate><guid>https://matthewpenney.net/projects/cyclops/</guid><description>&lt;h2 id="project-overview"&gt;Project Overview&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Cyclops&lt;/strong&gt; is a framework for investigating CPU behaviour/architecture and
+custom code performance.&lt;/p&gt;
+&lt;p&gt;It allows the user to create experiments using low-level resources like PMU
+counters and &lt;code&gt;rdtscp&lt;/code&gt;, with sensible implementations to improve avoid pitfalls.
+&lt;strong&gt;Cyclops&lt;/strong&gt; makes it easy to design reproducible and accurate experiments that
+can be easily orchestrated from the command line and visualised to gain
+insights.&lt;/p&gt;
+&lt;h2 id="features"&gt;Features&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Batches with user-defined warmup runs, batch runs and aggregation&lt;/li&gt;
+&lt;li&gt;Workload plugin system to easily write custom workloads with scriptable
+workload parameters (see &lt;code&gt;docs/workload.md&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Parameter sweeps to run multiple batches while varying one parameter and
+keeping the others fixed&lt;/li&gt;
+&lt;li&gt;Metric groups including raw metrics like PMU counters (&lt;code&gt;perf_event_open()&lt;/code&gt;)
+and &lt;code&gt;rdtscp&lt;/code&gt;, and ratios like IPC (see &lt;code&gt;docs/metrics.md&lt;/code&gt; for measurement
+methodology)&lt;/li&gt;
+&lt;li&gt;Results are written to stdout &amp;amp; CSV files with metadata for reproducibility&lt;/li&gt;
+&lt;li&gt;Python scripts for running and visualising some default experiments - see
+&lt;code&gt;experiments/&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="build-and-run"&gt;Build and Run&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;# clone repository&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;git clone https://mj-penney/cyclops.git cyclops
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;# enter repository&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;cd cyclops
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;# build&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;make
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#75715e"&gt;# run (generate help text)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./cyclops -h
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="example-usage"&gt;Example Usage&lt;/h2&gt;
+&lt;h3 id="example-1"&gt;Example 1&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Single batch&lt;/li&gt;
+&lt;li&gt;10 warmup runs&lt;/li&gt;
+&lt;li&gt;20 batch runs&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;BRANCH&lt;/code&gt; workload with default params&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;IPC&lt;/code&gt; metric group&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./cyclops -u &lt;span style="color:#ae81ff"&gt;10&lt;/span&gt; -r &lt;span style="color:#ae81ff"&gt;20&lt;/span&gt; -w BRANCH -m IPC
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id="example-2"&gt;Example 2&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;3 warmup runs&lt;/li&gt;
+&lt;li&gt;5 batch runs&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;STRIDED_ARRAY&lt;/code&gt; workload&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;L1D_READS&lt;/code&gt; metric group&lt;/li&gt;
+&lt;li&gt;19 batches, sweeping the &lt;code&gt;array-elements&lt;/code&gt; param from 10 to 100 in steps of 5&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"&gt;&lt;code class="language-bash" data-lang="bash"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;./cyclops -u &lt;span style="color:#ae81ff"&gt;3&lt;/span&gt; -r &lt;span style="color:#ae81ff"&gt;5&lt;/span&gt; -w STRIDED_ARRAY -m L1D_READS -s array-elements&lt;span style="color:#f92672"&gt;=&lt;/span&gt;10:100:5
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="experiments"&gt;Experiments&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;cyclops&lt;/code&gt; tool is designed to be highly scriptable, and make it easy to
+design performance &amp;amp; microarchitecture experiments.&lt;/p&gt;</description></item></channel></rss>

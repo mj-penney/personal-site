@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cyclops on Matthew Penney</title><link>https://matthewpenney.net/tags/cyclops/</link><description>Recent content in Cyclops on Matthew Penney</description><generator>Hugo</generator><language>en-gb</language><lastBuildDate>Tue, 16 Jun 2026 17:50:18 +0100</lastBuildDate><atom:link href="https://matthewpenney.net/tags/cyclops/index.xml" rel="self" type="application/rss+xml"/><item><title>Intel Kaby Lake: Cache Latencies</title><link>https://matthewpenney.net/posts/kaby_lake_cache_latencies/</link><pubDate>Tue, 16 Jun 2026 17:50:18 +0100</pubDate><guid>https://matthewpenney.net/posts/kaby_lake_cache_latencies/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In this post I use &lt;a href="https://github.com/mj-penney/cyclops"&gt;Cyclops&lt;/a&gt; to estimate
+the latencies of my Kaby Lake CPU&amp;rsquo;s L1D, L2 and L3 caches.&lt;/p&gt;
+&lt;h2 id="methods"&gt;Methods&lt;/h2&gt;
+&lt;p&gt;For this experiment I used the &lt;code&gt;STRIDED_ARRAY&lt;/code&gt; workload, in which an array with
+one element per 64-Byte cache line is processed.
+Having one element per cache line ensures that each load doesn&amp;rsquo;t bring other
+elements with it into cache.&lt;/p&gt;
+&lt;p&gt;Previous versions of the workload processed the array sequentially enabling the
+prefetcher to load future elements into cache ahead of time, hiding the true
+latency.
+To prevent prefetching, elements are now processed in a random order, where the
+index of the next element depends on the value of the current element.&lt;/p&gt;</description></item><item><title>Intel Kaby Lake: Branch Prediction</title><link>https://matthewpenney.net/posts/kaby_lake_branch_prediction/</link><pubDate>Sat, 06 Jun 2026 17:50:18 +0100</pubDate><guid>https://matthewpenney.net/posts/kaby_lake_branch_prediction/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;This is the first in what I hope will be a multi-part investigation into
+branch predictors, starting with my laptop&amp;rsquo;s Intel Kaby Lake CPU.
+Initially I just want to get a general overview the predictor&amp;rsquo;s behaviour
+rather than answer specific questions about its structure (e.g. &amp;ldquo;How many
+predictor tables are there?&amp;rdquo;).&lt;/p&gt;
+&lt;p&gt;Intel&amp;rsquo;s Kaby Lake microarchitecture uses the same branch predictor as Skylake.
+Like many modern branch predictors it has a hybrid structure that likely
+incorporates multiple predictor tables and a global history in a TAGE-like
+design.&lt;/p&gt;</description></item></channel></rss>

@@ -1,0 +1,219 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Matthew Penney</title><link>https://matthewpenney.net/posts/</link><description>Recent content in Posts on Matthew Penney</description><generator>Hugo -- gohugo.io</generator><language>en-gb</language><lastBuildDate>Tue, 16 Jun 2026 17:50:18 +0100</lastBuildDate><atom:link href="https://matthewpenney.net/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Intel Kaby Lake: Cache Latencies</title><link>https://matthewpenney.net/posts/kaby_lake_cache_latencies/</link><pubDate>Tue, 16 Jun 2026 17:50:18 +0100</pubDate><guid>https://matthewpenney.net/posts/kaby_lake_cache_latencies/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;In this post I use &lt;a href="https://github.com/mj-penney/cyclops"&gt;Cyclops&lt;/a&gt; to estimate
+the latencies of my Kaby Lake CPU&amp;rsquo;s L1D, L2 and L3 caches.&lt;/p&gt;
+&lt;h2 id="methods"&gt;Methods&lt;/h2&gt;
+&lt;p&gt;For this experiment I used the &lt;code&gt;STRIDED_ARRAY&lt;/code&gt; workload, in which an array with
+one element per 64-Byte cache line is processed.
+Having one element per cache line ensures that each load doesn&amp;rsquo;t bring other
+elements with it into cache.&lt;/p&gt;
+&lt;p&gt;Previous versions of the workload processed the array sequentially enabling the
+prefetcher to load future elements into cache ahead of time, hiding the true
+latency.
+To prevent prefetching, elements are now processed in a random order, where the
+index of the next element depends on the value of the current element.&lt;/p&gt;</description><content type="html"><![CDATA[<h2 id="introduction">Introduction</h2>
+<p>In this post I use <a href="https://github.com/mj-penney/cyclops">Cyclops</a> to estimate
+the latencies of my Kaby Lake CPU&rsquo;s L1D, L2 and L3 caches.</p>
+<h2 id="methods">Methods</h2>
+<p>For this experiment I used the <code>STRIDED_ARRAY</code> workload, in which an array with
+one element per 64-Byte cache line is processed.
+Having one element per cache line ensures that each load doesn&rsquo;t bring other
+elements with it into cache.</p>
+<p>Previous versions of the workload processed the array sequentially enabling the
+prefetcher to load future elements into cache ahead of time, hiding the true
+latency.
+To prevent prefetching, elements are now processed in a random order, where the
+index of the next element depends on the value of the current element.</p>
+<p>I swept through different array sizes and recorded the results using this
+Cyclops command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./cyclops <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    -w STRIDED_ARRAY <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    -m TASK_CLOCK_NS <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    -u <span style="color:#ae81ff">5</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    -r <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    -s array-size-kib<span style="color:#f92672">=</span>10:2800:20 <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    -p repeats<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>
+</span></span></code></pre></div><p>Here are some more general steps I took to reduce noise and increase accuracy:</p>
+<ul>
+<li>Pinned the thread to one core (Cyclops does this be default)</li>
+<li>Disabled SMT to prevent resource contention</li>
+<li>Disabled turbo frequency boost to reduce frequency scaling issues</li>
+</ul>
+<p>Even with these measures, it still took a few attempts to produce the clean
+cache-boundaries in the figure below (mainly the L2/L3 boundary).</p>
+<h2 id="results">Results</h2>
+<img src="/img/latency_plot.png" alt="Latency per Access" class="center" />
+<p>My results clearly show the jump in latency from the L1D cache to L2, with both
+producing singular flat values of 6 and 13 cycles respectively.</p>
+<p>There is also a clear jump from L2 to L3, however the L3 cache produced a range
+of latencies rather than a single value.
+I estimated this range to be 27-44 cycles, generally increasing as the
+working-set grows.</p>
+<p>The strangest feature of the curve is the sudden drop in latency from
+2030-2050KiB.
+This is a robust feature that exists every time I repeat the experiment,
+suggesting the cause may be microarchitectural rather than something transient.</p>
+<p>The L3 cache on Kaby Lake CPUs is shared between all cores unlike the L1D and
+L2 caches which are private per-core.
+It also has a more complex structure and is split into &ldquo;slices&rdquo; which I thought
+could be the cause of my strangely-shaped graph.
+However, after doing some reading, this seems unlikely since the slice that a
+cache-line is stored in is determined by a hash of its address, so the working
+set should stay evenly-distributed across slices as it grows.
+I would have to do more digging to come up with a good explanation.</p>
+<p>I struggled to find official latency figures for Kaby Lake, but I was able to
+find data for Skylake, which is a very similar microarchitecture.
+Below is a table comparing my Kaby Lake results with Agner Fog&rsquo;s work on
+Skylake, and Skylake minimum latencies from NASA:</p>
+<table>
+	<thead>
+			<tr>
+					<th>Cache</th>
+					<th style="text-align: right">My Results</th>
+					<th style="text-align: right">Agner&rsquo;s Skylake Results</th>
+					<th style="text-align: right">NASA&rsquo;s Skylake Figures</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>L1D</td>
+					<td style="text-align: right">6cy</td>
+					<td style="text-align: right">4cy</td>
+					<td style="text-align: right">4cy</td>
+			</tr>
+			<tr>
+					<td>L2</td>
+					<td style="text-align: right">13cy</td>
+					<td style="text-align: right">14cy</td>
+					<td style="text-align: right">12cy</td>
+			</tr>
+			<tr>
+					<td>L3</td>
+					<td style="text-align: right">27-44cy</td>
+					<td style="text-align: right">34-85cy</td>
+					<td style="text-align: right">44cy</td>
+			</tr>
+	</tbody>
+</table>
+<p>My results are fairly consistent with Agner&rsquo;s and NASA&rsquo;s figures.
+My L1D latency measurement is a little high compared to theirs, which may be
+related to my workload implementation (for each iteration I calculate the array
+element&rsquo;s address rather than doing a simple pointer dereference).</p>
+<p>My L2 measurement is directly between Agner&rsquo;s and NASA&rsquo;s L2 figures.</p>
+<p>Both me and Agner post a range of L3 latencies with significant overlap,
+although his range extends all the way up to 85 cycles.
+NASA&rsquo;s L3 minimum latency is exactly at the upper bound of my range.
+It seems the L3 cache is a confusing subject!</p>
+<h2 id="future-work">Future Work</h2>
+<ul>
+<li>Do more focused investigations on the structure and behaviour of the L3
+cache</li>
+<li>Edit the Cyclops workload to do a pure pointer chase</li>
+</ul>
+]]></content></item><item><title>Intel Kaby Lake: Branch Prediction</title><link>https://matthewpenney.net/posts/kaby_lake_branch_prediction/</link><pubDate>Sat, 06 Jun 2026 17:50:18 +0100</pubDate><guid>https://matthewpenney.net/posts/kaby_lake_branch_prediction/</guid><description>&lt;h2 id="introduction"&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;This is the first in what I hope will be a multi-part investigation into
+branch predictors, starting with my laptop&amp;rsquo;s Intel Kaby Lake CPU.
+Initially I just want to get a general overview the predictor&amp;rsquo;s behaviour
+rather than answer specific questions about its structure (e.g. &amp;ldquo;How many
+predictor tables are there?&amp;rdquo;).&lt;/p&gt;
+&lt;p&gt;Intel&amp;rsquo;s Kaby Lake microarchitecture uses the same branch predictor as Skylake.
+Like many modern branch predictors it has a hybrid structure that likely
+incorporates multiple predictor tables and a global history in a TAGE-like
+design.&lt;/p&gt;</description><content type="html"><![CDATA[<h2 id="introduction">Introduction</h2>
+<p>This is the first in what I hope will be a multi-part investigation into
+branch predictors, starting with my laptop&rsquo;s Intel Kaby Lake CPU.
+Initially I just want to get a general overview the predictor&rsquo;s behaviour
+rather than answer specific questions about its structure (e.g. &ldquo;How many
+predictor tables are there?&rdquo;).</p>
+<p>Intel&rsquo;s Kaby Lake microarchitecture uses the same branch predictor as Skylake.
+Like many modern branch predictors it has a hybrid structure that likely
+incorporates multiple predictor tables and a global history in a TAGE-like
+design.</p>
+<h2 id="methods">Methods</h2>
+<p>All experiments in this article are conducted using my microarchitecture
+research tool <a href="https://github.com/mj-penney/cyclops">Cyclops</a>.</p>
+<p>To profile the branch predictor I designed a workload that loops over an array
+of a fixed length containing a repeating pattern.
+For each iteration a branch is taken (T) if the current value in the pattern is
+&ldquo;1&rdquo; and not taken (NT) if it is &ldquo;0&rdquo;.
+I vary the length of the pattern and train the branch predictor on the repeated
+pattern using warmup runs before measuring results.
+For this investigation the patterns are unbiased towards T/NT.</p>
+<p>The predictor tables in TAGE-like predictors are indexed in part by using the
+memory address of the branch instruction, or program counter (PC).
+My workload currently uses only one branch PC, so it will not stress the
+predictor table capcities.
+However, varying the pattern length will tell us about how effectively the
+predictor is able to represent the history of branch prediction results.</p>
+<h2 id="profiling">Profiling</h2>
+<p>Initially I wanted to do a coarse-grained sweep of pattern lengths to see at
+which length the predictor starts to struggle, and how its accuracy degrades.</p>
+<img src="/img/branch_fig_1.png" alt="Branch Misprediction Curves" class="center" />
+<p>The branch predictor achieves effectively no mispredictions for short
+patterns (&lt;1k).
+At lengths of ~2-3k the misprediction rate rises exponentially.
+It then flattens out and converges to 50% for very long patterns.</p>
+<p>The smooth transition from near-perfect prediction to 50% mispredictions is
+consistent with a predictor that uses multiple history lengths.
+A predictor indexed using a single fixed history length would be expected to
+exhibit a much sharper transition.
+While this does not uniquely identify TAGE, it is consistent with
+reverse-engineering work which point to a TAGE-like design.</p>
+<p>The convergence to 50% mispredictions for long patterns suggests the predictor
+is unable to distinguish any structure and can only make uninformed guesses.</p>
+<p>Instructions per cycle (IPC) starts at about 1.12 for short patterns where
+there are no mispredictions.
+IPC drops sharply at around the same point that the misprediciton rate starts
+increasing, before also starting to level off and converges to ~0.44 for very
+long patterns.</p>
+<p>The peak IPC value of 1.12 while at ~0% mispredictions was lower than I
+expected considering the instruction level parallelism of Kaby Lake allows
+several instructions to retire per cycle.
+I suspect the IPC is being capped by a dependency chain in the workload,
+specifically on the <code>sum</code> and <code>i</code> variables, who&rsquo;s values depend on their
+values at the previous loop iteration.</p>
+<p>Having seen how the predictor behaves over a wide range of pattern lengths, I
+repeated the experiment for more focused ranges.
+The figure below shows the point at which the predictor starts making mistakes.</p>
+<img src="/img/branch_first_mispredictions.png" alt="Branch Misprediction Curves" class="center" />
+<p>The predictor achieves effectively perfect prediction for random, unbiased
+patterns of length up to ~900.
+Beyond that, the exponential increase in mispredictions begins.</p>
+<p>The next figure shows the misprediction rate and IPC for pattern lengths 2-5k,
+where the majority of the increase in misprediction rate occurs.</p>
+<img src="/img/branch_fig_2.png" alt="Branch Misprediction Curves" class="center" />
+<p>The thing that jumped out at me here was that IPC did not decrease
+significantly until the misprediction rate was already at ~10% (pattern length
+~3750), remaining above 1.1 until this point.
+For this workload the CPU&rsquo;s performance is bottlenecked by something other
+than branch misprediction penalties until the misprediction rate exceeds 10%.
+This is consistent with my earlier suggestion that something else is capping
+the IPC at 1.12.</p>
+<p>It is also at about this point that the misprediction rate stops exponentially
+increasing and begins to converge towards 50%.</p>
+<h2 id="key-results">Key Results</h2>
+<ul>
+<li>The smooth, broad structure of the misprediction rate vs pattern length curve
+is consistent with the idea that the predictor has a multi-table,
+multi-history-length, TAGE-like structure.</li>
+<li>For a single branch address, the predictor is able to achieve effectively 0
+mispredictions for random unbiased patterns of length up to ~900 once
+trained.</li>
+<li>The asymptotic approach to 50% mispredictions suggests that prediction never
+becomes systematically worse than random guessing.</li>
+</ul>
+<h2 id="future-investigations">Future Investigations</h2>
+<ul>
+<li>Vary the number and distribution of branch PCs.
+<ul>
+<li>Can I use this to infer more specific details about the predictor&rsquo;s
+structure?</li>
+</ul>
+</li>
+<li>Vary the bias of the pattern towards T/NT.
+<ul>
+<li>Does the direction of the bias affect predictor performance?</li>
+</ul>
+</li>
+<li>Compare results for different microarchitectures.</li>
+</ul>
+]]></content></item></channel></rss>
