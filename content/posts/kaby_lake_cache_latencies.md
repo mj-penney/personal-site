@@ -87,7 +87,7 @@ Skylake, and Skylake minimum latencies from NASA:
 | L3 | 27-44cy | 34-85cy | 44cy |
 
 My results are fairly consistent with Agner's and NASA's figures.
-My L1D latency measurement is a little high compared to theirs, whcih may be
+My L1D latency measurement is a little high compared to theirs, which may be
 related to my workload implementation (for each iteration I calculate the array
 element's address rather than doing a simple pointer dereference).
 
